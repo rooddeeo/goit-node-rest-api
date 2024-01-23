@@ -4,18 +4,18 @@ import { nanoid } from "nanoid";
 
 const contactsPath = path.join("db", "contacts.json");
 
-const listContacts = async () => {
+export const listContacts = async () => {
 	const readFileContacts = await fs.readFile(contactsPath, "utf-8");
 	return JSON.parse(readFileContacts);
 };
 
-const getContactById = async contactId => {
+export const getContactById = async contactId => {
 	const readFileContacts = await listContacts();
 	const result = readFileContacts.find(contact => contact.id === contactId);
 	return result || null;
 };
 
-const addContact = async data => {
+export const addContact = async data => {
 	const readFileContacts = await listContacts();
 	const addNewContact = {
 		id: nanoid(),
@@ -26,7 +26,7 @@ const addContact = async data => {
 	return addNewContact;
 };
 
-const removeContact = async contactId => {
+export const removeContact = async contactId => {
 	const readFileContacts = await listContacts();
 	const indexContacts = readFileContacts.findIndex(contact => contact.id === contactId);
 	if (indexContacts === -1) {
@@ -37,4 +37,29 @@ const removeContact = async contactId => {
 	return result;
 };
 
-export default listContacts;
+export const contactUpdate = async (contactId, data) => {
+	const readFileContacts = await listContacts();
+
+	const indexContact = readFileContacts.findIndex(contact => contact.id === contactId);
+	if (indexContact === -1) {
+		return null;
+	}
+	const currentContact = readFileContacts[indexContact];
+
+	// Сравниваем каждое поле и обновляем только то, которое изменилось
+	const updatedContact = {
+		...currentContact,
+		...Object.entries(data).reduce((acc, [key, value]) => {
+			if (currentContact[key] !== value) {
+				acc[key] = value;
+			}
+			return acc;
+		}, {}),
+	};
+
+	readFileContacts[indexContact] = updatedContact;
+
+	await fs.writeFile(contactsPath, JSON.stringify(readFileContacts, null, 2));
+
+	return updatedContact;
+};
