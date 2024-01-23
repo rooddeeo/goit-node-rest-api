@@ -46,7 +46,6 @@ export const contactUpdate = async (contactId, data) => {
 	}
 	const currentContact = readFileContacts[indexContact];
 
-	// Сравниваем каждое поле и обновляем только то, которое изменилось
 	const updatedContact = {
 		...currentContact,
 		...Object.entries(data).reduce((acc, [key, value]) => {
